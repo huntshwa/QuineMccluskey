@@ -88,13 +88,45 @@ public class Main {
             System.out.println("-----------------------------------------------------");
 
             //next step is here, you need to do ess. prime implicants
-            int[][] essPrimeTable = new int[realMinterms.size()][primeImplicants.size()];
+//            boolean[][] essPrimeTable = new boolean[realMinterms.size()][primeImplicants.size()];
+            HashMap<String, boolean[]> essPrimeTable = new HashMap<>();
+            ArrayList<Integer> tempEssPrimes = new ArrayList<>();
+            HashMap<String, int[]> essPrimeImplicants = new HashMap<>();
 
-            for (int[] list : primeImplicants.values()) {
-                for (int k = 0; k < list.length; k++) {
-                    if (list[k] = )
-                }
+            for (String key : primeImplicants.keySet()) {
+                essPrimeTable.put(key, new boolean[realMinterms.size()]);
             }
+
+            for (int j = 0; j < realMinterms.size(); j++) {
+
+            }
+//            int row = 0;
+//            for (int[] list : primeImplicants.values()) {
+//                for (int k = 0; k < list.length; k++) {
+//                    for (int l = 0; l < realMinterms.size(); l++) {
+//                        if (list[k] == realMinterms.get(l).getOriginalTerms()[0]) {
+//                            essPrimeTable[row][l] = true;
+//                        }
+//                    }
+//                }
+//                row++;
+//            }
+//
+//            for (int c = 0; c < essPrimeTable[0].length; c++) {
+//                int count = 0;
+//                int index = 0;
+//                for (int r = 0; r < essPrimeTable.length; r++) {
+//                    if (essPrimeTable[r][c]) {
+//                        count++;
+//                        index = r;
+//                    }
+//                }
+//                if (count == 1) tempEssPrimes.add(index);
+//            }
+//
+//            for (int num : tempEssPrimes) {
+//                essPrimeImplicants.put(primeImplicantsprimeImplicants.get(num));
+//            }
 
         }
     }

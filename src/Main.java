@@ -95,11 +95,23 @@ public class Main {
 
             for (String key : primeImplicants.keySet()) {
                 essPrimeTable.put(key, new boolean[realMinterms.size()]);
+                boolean[] row = essPrimeTable.get(key);
+                for (int j = 0; j < primeImplicants.get(key).length; j++) {
+                    for (int k = 0; k < row.length; k++) {
+                        System.out.println(realMinterms.get(k));
+                        if (primeImplicants.get(key)[j] == realMinterms.get(k).getOriginalTerms()[0]) {
+                           // System.out.println(key + " " + primeImplicants.get(key)[j]);
+                            //System.out.println(key + " " + primeImplicants.get(key)[j]);
+                            essPrimeTable.get(key)[k] = true;
+                        }
+                    }
+                }
             }
-
-            for (int j = 0; j < realMinterms.size(); j++) {
-
-            }
+            System.out.println("-----------------------------------------------------");
+            System.out.print("BinRep:" + "   ");
+            realMinterms.forEach(term -> System.out.print(term.getOriginalTerms()[0] + "    "));
+            System.out.println();
+            essPrimeTable.forEach((key, list) -> System.out.println(key + " : " + Arrays.toString(list)));
 //            int row = 0;
 //            for (int[] list : primeImplicants.values()) {
 //                for (int k = 0; k < list.length; k++) {

@@ -12,8 +12,10 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException {
         read();
 
+        System.out.println("********************");
         //go through all outputs
         for (int i = 0; i < numOutputs; i++) {
+            System.out.println("Output " + (i + 1) + ": ");
             ArrayList<Term> unorderedMinterms = new ArrayList<>();
             ArrayList<Term> realMinterms = new ArrayList<>();
             HashMap<String, int[]> primeImplicants = new HashMap<>();
@@ -85,9 +87,12 @@ public class Main {
 
                 minterms = newMinterms;
             }
+
+            /*
+            Prints all prime implicants
             primeImplicants.forEach((key, list) -> System.out.println(key + " : " + Arrays.toString(list)));
             System.out.println("-----------------------------------------------------");
-
+            */
 
             HashMap<String, boolean[]> essPrimeTable = new HashMap<>();
             HashSet<Integer> tempEssPrimes = new HashSet<>();
@@ -105,14 +110,15 @@ public class Main {
                     }
                 }
             }
-
+            /*
+            Prints the prime implicant table
             System.out.print("BinRep:" + "   ");
             realMinterms.forEach(term -> System.out.print(term.getOriginalTerms()[0] + "    "));
             System.out.println();
             essPrimeTable.forEach((key, list) -> System.out.println(key + " : " + Arrays.toString(list)));
 
             System.out.println("-----------------------------------------------------");
-
+            */
             //column major order to find essential minterms
             for (int c = 0; c < realMinterms.size(); c++) {
                 int count = 0;
@@ -216,16 +222,23 @@ public class Main {
                     tempEqu = simplification(tempEqu);
                 }
 
+                /*
+                Prints Petricks equation and bit to var converter
                 System.out.println(bitToVar);
                 System.out.println(tempEqu);
                 System.out.println("-----------------------------------------------------");
-
+                */
                 int number = 1;
                 for (BitSet set : tempEqu) {
                     System.out.print("Equation " + number + ": ");
-                    essPrimeImplicants.forEach((key, list) -> System.out.print(key + "  "));
+                    essPrimeImplicants.forEach((key, list) -> System.out.print(key + " + "));
+                    int counter = 1;
                     for (BitSet key : bitToVar.keySet()) {
-                        if (set.intersects(key)) System.out.print(bitToVar.get(key) + "  ");
+                        if (set.intersects(key)) {
+                            if (counter == set.cardinality()) System.out.print(bitToVar.get(key));
+                            else System.out.print(bitToVar.get(key) + " + ");
+                            counter++;
+                        }
                     }
 
                     number++;
@@ -235,7 +248,6 @@ public class Main {
 
 
 
-            System.out.println();
             System.out.println("********************");
         }
     }
@@ -248,10 +260,11 @@ public class Main {
         numInputs = s.nextInt();
         numTerms = (int) Math.pow(2, numInputs);
 
+        //Test files and my truth table file
 //        File f = new File("src/WikiTruthTest.csv");
-//        File f = new File("src/TruthTable.csv");
+        File f = new File("src/TruthTable.csv");
 //        File f = new File("src/TruthTableTest.csv");
-        File f = new File("src/Petrick.csv");
+//        File f = new File("src/Petrick.csv");
         s = new Scanner(f);
 
         terms = new Term[numTerms];
@@ -279,7 +292,6 @@ public class Main {
                     outputLine[i - numInputs] = splitLine[i];
                 }
             }
-
             terms[j] = new Term(binaryRep, outputLine);
             j++;
         }

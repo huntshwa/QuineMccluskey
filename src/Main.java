@@ -183,11 +183,6 @@ public class Main {
                     }
                 }
 
-                System.out.print("BinRep:" + "   ");
-                missing.forEach(num -> System.out.print(num + "    "));
-                System.out.println();
-                newEssPrimeTable.forEach((key, list) -> System.out.println(key + " : " + Arrays.toString(list)));
-
                 HashMap<BitSet, String> bitToVar = new HashMap<>();
                 HashMap<String, BitSet> varToBit = new HashMap<>();
 
@@ -200,7 +195,7 @@ public class Main {
                     count++;
                 }
 
-                System.out.println("-----------------------------------------------------");
+
                 ArrayList<ArrayList<BitSet>> equation = new ArrayList<>();
                 for (int c = 0; c < missing.size(); c++) {
                     ArrayList<BitSet> nestedEqu = new ArrayList<>();
@@ -211,51 +206,36 @@ public class Main {
                     }
                     equation.add(nestedEqu);
                 }
-                System.out.println(equation);
-                //impliment the bitmap pretricks method
-                while (equation.size() > 1) {
-                    if (equation.size() % 2 != 0);
 
-                    ArrayList<BitSet> tempEqu = equation.getFirst();
 
-                    for (int j = 1; j < equation.size() - 1; j++) {
-                        tempEqu = (bitListMerge(tempEqu, equation.get(j + 1)));
-                    }
+                //Petricks method
+                ArrayList<BitSet> tempEqu = equation.getFirst();
+
+                for (int j = 1; j < equation.size(); j++) {
+                    tempEqu = (bitListMerge(tempEqu, equation.get(j)));
+                    tempEqu = simplification(tempEqu);
                 }
 
-
-                for (BitSet set : equation.getFirst()) {
-                    System.out.println(bitToVar.get(set));
-                }
+                System.out.println(bitToVar);
+                System.out.println(tempEqu);
                 System.out.println("-----------------------------------------------------");
 
-//
-//                HashSet<String> addTerms = new HashSet<>();
-//                for (String key : primeImplicants.keySet()) {
-//                    for (int num : missing) {
-//                        for (int checkNum : primeImplicants.get(key)) {
-//                            if (checkNum == num) addTerms.add(key);
-//                        }
-//                    }
-//                }
-//                System.out.println(missing);
-//                System.out.println(addTerms);
-//
-//                int count = 1;
-//                for (String str : addTerms) {
-//                    HashSet<String> temp = new HashSet<>();
-//
-//                    for (String key : essPrimeImplicants.keySet()) {
-//                        temp.add(key);
-//                    }
-//                    temp.add(str);
-//                    String equation = String.join(" + ", temp);
-//                    System.out.println("Equation " + count + ": " + equation);
-//                    count++;
-//                }
+                int number = 1;
+                for (BitSet set : tempEqu) {
+                    System.out.print("Equation " + number + ": ");
+                    essPrimeImplicants.forEach((key, list) -> System.out.print(key + "  "));
+                    for (BitSet key : bitToVar.keySet()) {
+                        if (set.intersects(key)) System.out.print(bitToVar.get(key) + "  ");
+                    }
 
+                    number++;
+                    System.out.println();
+                }
             }
-            essPrimeImplicants.forEach((key, list) -> System.out.println(key + " : " + Arrays.toString(list)));
+
+
+
+            System.out.println();
             System.out.println("********************");
         }
     }
@@ -268,9 +248,9 @@ public class Main {
         numInputs = s.nextInt();
         numTerms = (int) Math.pow(2, numInputs);
 
-        //File f = new File("src/WikiTruthTest.csv");
-        //File f = new File("src/TruthTable.csv");
-        //File f = new File("src/TruthTableTest.csv");
+//        File f = new File("src/WikiTruthTest.csv");
+//        File f = new File("src/TruthTable.csv");
+//        File f = new File("src/TruthTableTest.csv");
         File f = new File("src/Petrick.csv");
         s = new Scanner(f);
 
@@ -340,10 +320,16 @@ public class Main {
     public static ArrayList<BitSet> simplification(ArrayList<BitSet> list) {
         ArrayList<BitSet> newList = new ArrayList<>();
 
-        for (int i = 0; i < list.size() - 1; i++) {
-            for (int j = i; j < list.size(); j++)
-            if (list.get(i).cardinality() )
+        newList.add(list.getFirst());
+        for (int i = 1; i < list.size(); i++) {
+            if (list.get(i).cardinality() < newList.getFirst().cardinality()) {
+              newList.clear();
+              newList.add(list.get(i));
+            } else if (list.get(i).cardinality() == newList.getFirst().cardinality()) {
+                newList.add(list.get(i));
+            }
         }
-        return null;
+
+        return newList;
     }
 }

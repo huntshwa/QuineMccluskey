@@ -1,8 +1,5 @@
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 import java.io.File;
 
 public class Main {
@@ -15,20 +12,23 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException {
         read();
 
+        //go through all outputs
         for (int i = 0; i < numOutputs; i++) {
             ArrayList<Term> unorderedMinterms = new ArrayList<>();
             ArrayList<Term> realMinterms = new ArrayList<>();
             HashMap<String, int[]> primeImplicants = new HashMap<>();
             HashMap<Integer, ArrayList<Term>> minterms = new HashMap<>();
+            //adding minterms and dont cares
             for (Term term : terms) {
-                if (term.getOutput()[0].equals("1")) {
+                if (term.getOutput()[i].equals("1")) {
                     unorderedMinterms.add(term);
                     realMinterms.add(term);
                 }
-                if (term.getOutput()[0].equals("x"))
+                if (term.getOutput()[i].equals("x"))
                     unorderedMinterms.add(term);
             }
 
+            //ordering minterms into a hashmap
             for (int j = 0; j <= numInputs; j++) {
                 if (!minterms.containsKey(j)) {
                     minterms.put(j, new ArrayList<>());
@@ -44,6 +44,7 @@ public class Main {
                 }
             }
 
+            //loop the merge process
             boolean iterate = true;
             while (iterate) {
                 HashMap<Integer, ArrayList<Term>> newMinterms = new HashMap<>();
@@ -87,59 +88,175 @@ public class Main {
             primeImplicants.forEach((key, list) -> System.out.println(key + " : " + Arrays.toString(list)));
             System.out.println("-----------------------------------------------------");
 
-            //next step is here, you need to do ess. prime implicants
-//            boolean[][] essPrimeTable = new boolean[realMinterms.size()][primeImplicants.size()];
+
             HashMap<String, boolean[]> essPrimeTable = new HashMap<>();
-            ArrayList<Integer> tempEssPrimes = new ArrayList<>();
+            HashSet<Integer> tempEssPrimes = new HashSet<>();
             HashMap<String, int[]> essPrimeImplicants = new HashMap<>();
 
+            //making the essential prime implicant table
             for (String key : primeImplicants.keySet()) {
                 essPrimeTable.put(key, new boolean[realMinterms.size()]);
                 boolean[] row = essPrimeTable.get(key);
                 for (int j = 0; j < primeImplicants.get(key).length; j++) {
                     for (int k = 0; k < row.length; k++) {
-                        System.out.println(realMinterms.get(k));
                         if (primeImplicants.get(key)[j] == realMinterms.get(k).getOriginalTerms()[0]) {
-                           // System.out.println(key + " " + primeImplicants.get(key)[j]);
-                            //System.out.println(key + " " + primeImplicants.get(key)[j]);
                             essPrimeTable.get(key)[k] = true;
                         }
                     }
                 }
             }
-            System.out.println("-----------------------------------------------------");
+
             System.out.print("BinRep:" + "   ");
             realMinterms.forEach(term -> System.out.print(term.getOriginalTerms()[0] + "    "));
             System.out.println();
             essPrimeTable.forEach((key, list) -> System.out.println(key + " : " + Arrays.toString(list)));
-//            int row = 0;
-//            for (int[] list : primeImplicants.values()) {
-//                for (int k = 0; k < list.length; k++) {
-//                    for (int l = 0; l < realMinterms.size(); l++) {
-//                        if (list[k] == realMinterms.get(l).getOriginalTerms()[0]) {
-//                            essPrimeTable[row][l] = true;
+
+            System.out.println("-----------------------------------------------------");
+
+            //column major order to find essential minterms
+            for (int c = 0; c < realMinterms.size(); c++) {
+                int count = 0;
+                String binRep = "";
+                for (String key : essPrimeTable.keySet()) {
+                    if (essPrimeTable.get(key)[c]) {
+                        count++;
+                        binRep = key;
+                    }
+                }
+
+                if (count == 1) essPrimeImplicants.put(binRep, primeImplicants.get(binRep));
+            }
+
+
+            for (int[] arr : essPrimeImplicants.values()) {
+                for (int num : arr) {
+                    boolean contains = false;
+
+                    for (Term real : realMinterms) {
+                        if (num == real.getOriginalTerms()[0]) contains = true;
+                    }
+
+                    if (contains) tempEssPrimes.add(num);
+                }
+            }
+
+            ArrayList<Integer> neededTerms = new ArrayList<>();
+            for (Term term : realMinterms) {
+                neededTerms.add(term.getOriginalTerms()[0]);
+            }
+
+            if (tempEssPrimes.size() == neededTerms.size()) {
+                String equation = String.join(" + ", essPrimeImplicants.keySet());
+                System.out.println("Equation: " + equation);
+            } else {
+
+                ArrayList<Integer> missing = new ArrayList<>();
+                for (int neededNum : neededTerms) {
+                    boolean contains = false;
+                    for (int tempNum : tempEssPrimes) {
+                        if (tempNum == neededNum) {
+                            contains = true;
+                            break;
+                        }
+                    }
+                    if (!contains) missing.add(neededNum);
+                }
+
+                HashMap<String, boolean[]> newEssPrimeTable = new HashMap<>();
+                for (String key : primeImplicants.keySet()) {
+                    boolean isEss = false;
+                    for (String essKey : essPrimeImplicants.keySet()) {
+                        if (key.equals(essKey)) {
+                            isEss = true;
+                            break;
+                        }
+                    }
+                    if (isEss) continue;
+                    newEssPrimeTable.put(key, new boolean[missing.size()]);
+                    boolean[] row = newEssPrimeTable.get(key);
+                    for (int j = 0; j < primeImplicants.get(key).length; j++) {
+                        for (int k = 0; k < row.length; k++) {
+                            if (primeImplicants.get(key)[j] == missing.get(k)) {
+                                newEssPrimeTable.get(key)[k] = true;
+                            }
+                        }
+                    }
+                }
+
+                System.out.print("BinRep:" + "   ");
+                missing.forEach(num -> System.out.print(num + "    "));
+                System.out.println();
+                newEssPrimeTable.forEach((key, list) -> System.out.println(key + " : " + Arrays.toString(list)));
+
+                HashMap<BitSet, String> bitToVar = new HashMap<>();
+                HashMap<String, BitSet> varToBit = new HashMap<>();
+
+                int count = 0;
+                for (String key : newEssPrimeTable.keySet()) {
+                    BitSet bitSet = new BitSet();
+                    bitSet.set(count);
+                    bitToVar.put(bitSet, key);
+                    varToBit.put(key, bitSet);
+                    count++;
+                }
+
+                System.out.println("-----------------------------------------------------");
+                ArrayList<ArrayList<BitSet>> equation = new ArrayList<>();
+                for (int c = 0; c < missing.size(); c++) {
+                    ArrayList<BitSet> nestedEqu = new ArrayList<>();
+                    for (String key : newEssPrimeTable.keySet()) {
+                        if (newEssPrimeTable.get(key)[c]) {
+                            nestedEqu.add(varToBit.get(key));
+                        }
+                    }
+                    equation.add(nestedEqu);
+                }
+                System.out.println(equation);
+                //impliment the bitmap pretricks method
+                while (equation.size() > 1) {
+                    if (equation.size() % 2 != 0);
+
+                    ArrayList<BitSet> tempEqu = equation.getFirst();
+
+                    for (int j = 1; j < equation.size() - 1; j++) {
+                        tempEqu = (bitListMerge(tempEqu, equation.get(j + 1)));
+                    }
+                }
+
+
+                for (BitSet set : equation.getFirst()) {
+                    System.out.println(bitToVar.get(set));
+                }
+                System.out.println("-----------------------------------------------------");
+
+//
+//                HashSet<String> addTerms = new HashSet<>();
+//                for (String key : primeImplicants.keySet()) {
+//                    for (int num : missing) {
+//                        for (int checkNum : primeImplicants.get(key)) {
+//                            if (checkNum == num) addTerms.add(key);
 //                        }
 //                    }
 //                }
-//                row++;
-//            }
+//                System.out.println(missing);
+//                System.out.println(addTerms);
 //
-//            for (int c = 0; c < essPrimeTable[0].length; c++) {
-//                int count = 0;
-//                int index = 0;
-//                for (int r = 0; r < essPrimeTable.length; r++) {
-//                    if (essPrimeTable[r][c]) {
-//                        count++;
-//                        index = r;
+//                int count = 1;
+//                for (String str : addTerms) {
+//                    HashSet<String> temp = new HashSet<>();
+//
+//                    for (String key : essPrimeImplicants.keySet()) {
+//                        temp.add(key);
 //                    }
+//                    temp.add(str);
+//                    String equation = String.join(" + ", temp);
+//                    System.out.println("Equation " + count + ": " + equation);
+//                    count++;
 //                }
-//                if (count == 1) tempEssPrimes.add(index);
-//            }
-//
-//            for (int num : tempEssPrimes) {
-//                essPrimeImplicants.put(primeImplicantsprimeImplicants.get(num));
-//            }
 
+            }
+            essPrimeImplicants.forEach((key, list) -> System.out.println(key + " : " + Arrays.toString(list)));
+            System.out.println("********************");
         }
     }
 
@@ -151,7 +268,10 @@ public class Main {
         numInputs = s.nextInt();
         numTerms = (int) Math.pow(2, numInputs);
 
-        File f = new File("src/WikiTruthTest.csv");
+        //File f = new File("src/WikiTruthTest.csv");
+        //File f = new File("src/TruthTable.csv");
+        //File f = new File("src/TruthTableTest.csv");
+        File f = new File("src/Petrick.csv");
         s = new Scanner(f);
 
         terms = new Term[numTerms];
@@ -196,5 +316,34 @@ public class Main {
         }
 
         return newArr;
+    }
+
+    public static ArrayList<BitSet> bitListMerge(ArrayList<BitSet> list1, ArrayList<BitSet> list2) {
+        ArrayList<BitSet> newList = new ArrayList<>();
+        HashSet<String> check = new HashSet<>();
+
+        for (BitSet set1 : list1) {
+            for (BitSet set2 : list2) {
+                BitSet temp = (BitSet) set1.clone();
+                temp.or(set2);
+
+                if (!check.contains(temp.toString())) {
+                    check.add(temp.toString());
+                    newList.add(temp);
+                }
+            }
+        }
+
+        return newList;
+    }
+
+    public static ArrayList<BitSet> simplification(ArrayList<BitSet> list) {
+        ArrayList<BitSet> newList = new ArrayList<>();
+
+        for (int i = 0; i < list.size() - 1; i++) {
+            for (int j = i; j < list.size(); j++)
+            if (list.get(i).cardinality() )
+        }
+        return null;
     }
 }

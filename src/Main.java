@@ -32,29 +32,32 @@ public class Main {
 
             //ordering minterms into a hashmap
             for (int j = 0; j <= numInputs; j++) {
-                if (!minterms.containsKey(j)) {
-                    minterms.put(j, new ArrayList<>());
-                }
-                for (Term term : unorderedMinterms) {
-
-                    int count = 0;
-                    for (int k = 0; k < term.getBinaryRep().length(); k++) {
-                        if (term.getBinaryRep().charAt(k) == '1') count++;
-                    }
-
-                    if (count == j) minterms.get(j).add(term);
-                }
+                minterms.put(j, new ArrayList<>());
             }
+
+            for (Term term : unorderedMinterms) {
+                int count = 0;
+                for (int k = 0; k < term.getBinaryRep().length(); k++) {
+                    if (term.getBinaryRep().charAt(k) == '1') count++;
+
+                }
+
+                minterms.get(count).add(term);
+            }
+
 
             //loop the merge process
             boolean iterate = true;
             while (iterate) {
+                boolean merged = false;
                 HashMap<Integer, ArrayList<Term>> newMinterms = new HashMap<>();
-                for (int j = 0; j < minterms.size() - 1; j++) {
-                    if (!newMinterms.containsKey(j)) {
-                        newMinterms.put(j, new ArrayList<>());
-                    }
+                HashSet<String> dedup = new HashSet<>();
 
+                for (int j = 0; j <= numInputs; j++) {
+                    newMinterms.put(j, new ArrayList<>());
+                }
+
+                for (int j = 0; j < numInputs; j++) {
                     for (int k = 0; k < minterms.get(j).size(); k++) {
                         Term curTerm = minterms.get(j).get(k);
                         for (int l = 0; l < minterms.get(j + 1).size(); l++) {
@@ -66,26 +69,37 @@ public class Main {
 
                                 Term addTerm = new Term(newBinRep, curTerm.getOutput(), addOgTerms);
 
-                                newMinterms.get(j).add(addTerm);
-                                curTerm.updateUsed(true);
-                                compTerm.updateUsed(true);
+                                String check = newBinRep + Arrays.toString(addOgTerms);
+
+                                if (dedup.contains(check)) {
+                                    dedup.add(check);
+                                    newMinterms.get(j).add(addTerm);
+                                    merged = true;
+                                    curTerm.updateUsed(true);
+                                    compTerm.updateUsed(true);
+                                }
                             }
                         }
                     }
 
                 }
 
-                iterate = false;
+                iterate = merged;
                 for (ArrayList<Term> termList : minterms.values()) {
                     for (Term term : termList) {
                         if (!term.getUsed()) {
                             primeImplicants.put(term.getBinaryRep(), term.getOriginalTerms());
                         }
-                        if (term.getUsed()) iterate = true;
                     }
                 }
 
                 minterms = newMinterms;
+
+                for (ArrayList<Term> list : minterms.values()) {
+                    for (Term term : list) {
+                        term.updateUsed(false);
+                    }
+                }
             }
 
             /*
@@ -219,17 +233,38 @@ public class Main {
 
                 for (int j = 1; j < equation.size(); j++) {
                     tempEqu = (bitListMerge(tempEqu, equation.get(j)));
+
+                    HashSet<BitSet> dedup = new HashSet<>();
+                    for (BitSet set : tempEqu) {
+                        dedup.add(set);
+                    }
+                    tempEqu.clear();
+                    for (BitSet key : dedup) {
+                        tempEqu.add(key);
+                    }
+
                     tempEqu = simplification(tempEqu);
+                }
+
+                int minCard = Integer.MAX_VALUE;
+                ArrayList<BitSet> finalEqu = new ArrayList<>();
+
+                for (int j = 0; j < tempEqu.size(); j++) {
+                    if (tempEqu.get(j).cardinality() < minCard) minCard = tempEqu.get(j).cardinality();
+                }
+
+                for (int j = 0; j < tempEqu.size(); j++) {
+                    if (tempEqu.get(j).cardinality() == minCard) finalEqu.add(tempEqu.get(j));
                 }
 
                 /*
                 Prints Petricks equation and bit to var converter
                 System.out.println(bitToVar);
-                System.out.println(tempEqu);
+                System.out.println(finalEqu);
                 System.out.println("-----------------------------------------------------");
                 */
                 int number = 1;
-                for (BitSet set : tempEqu) {
+                for (BitSet set : finalEqu) {
                     System.out.print("Equation " + number + ": ");
                     essPrimeImplicants.forEach((key, list) -> System.out.print(key + " + "));
                     int counter = 1;
@@ -304,7 +339,7 @@ public class Main {
             newArr[i] = arr1[i];
         }
         for (int i = 0; i < arr2.length; i++) {
-            newArr[i + arr2.length] = arr2[i];
+            newArr[i + arr1.length] = arr2[i];
         }
 
         return newArr;
@@ -330,18 +365,30 @@ public class Main {
     }
 
     public static ArrayList<BitSet> simplification(ArrayList<BitSet> list) {
+
         ArrayList<BitSet> newList = new ArrayList<>();
 
-        newList.add(list.getFirst());
-        for (int i = 1; i < list.size(); i++) {
-            if (list.get(i).cardinality() < newList.getFirst().cardinality()) {
-              newList.clear();
-              newList.add(list.get(i));
-            } else if (list.get(i).cardinality() == newList.getFirst().cardinality()) {
-                newList.add(list.get(i));
+        for (int i = 0; i < list.size(); i++) {
+            BitSet outer = list.get(i);
+            boolean simp = false;
+
+            for (int j = 0; j < list.size(); j++) {
+                if (i == j) continue;
+
+                BitSet temp = (BitSet) outer.clone();
+                BitSet inner = list.get(j);
+                temp.and(inner);
+
+                if (temp.equals(inner) && !outer.equals(inner)) {
+                    simp = true;
+                    break;
+                }
+            }
+
+            if (!simp) {
+                newList.add(outer);
             }
         }
-
         return newList;
     }
 }

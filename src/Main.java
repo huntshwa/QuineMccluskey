@@ -8,6 +8,7 @@ public class Main {
     private static int numOutputs;
     private static int numTerms;
     private static Term[] terms;
+    private static ArrayList<ArrayList<String>> finalEquation = new ArrayList<>();
 
     public static void main(String[] args) throws FileNotFoundException {
         read();
@@ -51,7 +52,6 @@ public class Main {
             while (iterate) {
                 boolean merged = false;
                 HashMap<Integer, ArrayList<Term>> newMinterms = new HashMap<>();
-                HashSet<String> dedup = new HashSet<>();
 
                 for (int j = 0; j <= numInputs; j++) {
                     newMinterms.put(j, new ArrayList<>());
@@ -69,15 +69,11 @@ public class Main {
 
                                 Term addTerm = new Term(newBinRep, curTerm.getOutput(), addOgTerms);
 
-                                String check = newBinRep + Arrays.toString(addOgTerms);
+                                newMinterms.get(j).add(addTerm);
+                                merged = true;
+                                curTerm.updateUsed(true);
+                                compTerm.updateUsed(true);
 
-                                if (dedup.contains(check)) {
-                                    dedup.add(check);
-                                    newMinterms.get(j).add(addTerm);
-                                    merged = true;
-                                    curTerm.updateUsed(true);
-                                    compTerm.updateUsed(true);
-                                }
                             }
                         }
                     }
@@ -103,10 +99,11 @@ public class Main {
             }
 
             /*
-            Prints all prime implicants
+            //Prints all prime implicants
             primeImplicants.forEach((key, list) -> System.out.println(key + " : " + Arrays.toString(list)));
             System.out.println("-----------------------------------------------------");
-            */
+             */
+
 
             HashMap<String, boolean[]> essPrimeTable = new HashMap<>();
             HashSet<Integer> tempEssPrimes = new HashSet<>();
@@ -166,8 +163,17 @@ public class Main {
             }
 
             if (tempEssPrimes.size() == neededTerms.size()) {
+
+                finalEquation.add(new ArrayList<>());
+                for (String key : essPrimeImplicants.keySet()) {
+                    finalEquation.getFirst().add(key);
+                }
+
+                /*
                 String equation = String.join(" + ", essPrimeImplicants.keySet());
                 System.out.println("Equation: " + equation);
+                 */
+
             } else {
 
                 ArrayList<Integer> missing = new ArrayList<>();
@@ -263,9 +269,25 @@ public class Main {
                 System.out.println(finalEqu);
                 System.out.println("-----------------------------------------------------");
                 */
-                int number = 1;
+                //int number = 1;
+                int number = 0;
                 for (BitSet set : finalEqu) {
                     System.out.print("Equation " + number + ": ");
+
+                    finalEquation.add(new ArrayList<>());
+
+                    for (String key : essPrimeImplicants.keySet()) {
+                        finalEquation.get(number).add(key);
+                    }
+
+                    for (BitSet key : bitToVar.keySet()) {
+                        if (set.intersects(key)) {
+                            finalEquation.get(number).add(bitToVar.get(key));
+                        }
+                    }
+
+
+                    /*
                     essPrimeImplicants.forEach((key, list) -> System.out.print(key + " + "));
                     int counter = 1;
                     for (BitSet key : bitToVar.keySet()) {
@@ -275,14 +297,14 @@ public class Main {
                             counter++;
                         }
                     }
+                     */
 
                     number++;
                     System.out.println();
                 }
             }
 
-
-
+            System.out.println(letterEq(finalEquation));
             System.out.println("********************");
         }
     }
@@ -297,8 +319,8 @@ public class Main {
 
         //Test files and my truth table file
 //        File f = new File("src/WikiTruthTest.csv");
-        File f = new File("src/TruthTable.csv");
-//        File f = new File("src/TruthTableTest.csv");
+//        File f = new File("src/TruthTable.csv");
+        File f = new File("src/TruthTableTest.csv");
 //        File f = new File("src/Petrick.csv");
         s = new Scanner(f);
 
@@ -391,4 +413,41 @@ public class Main {
         }
         return newList;
     }
+
+    /**
+     *
+     * @param binRep length is greater than zero and less than 26
+     * @return binRep converted to letters as a term
+     */
+    public static String numToLetter(String binRep) {
+        String result = "";
+
+        for (int i = 0; i < binRep.length(); i++) {
+            char curChar = binRep.charAt(i);
+            if (curChar != '-') {
+                char letter = (char) ('A' + i);
+                result += letter;
+                if (curChar == '0') {
+                    result += "'";
+                }
+            }
+        }
+
+        return result;
+    }
+
+
+    public static ArrayList<ArrayList<String>> letterEq(ArrayList<ArrayList<String>> numEq) {
+        ArrayList<ArrayList<String>> letterFinalEq = new ArrayList<>(numEq.size());
+
+        for(int i = 0; i < numEq.size(); i++) {
+            letterFinalEq.add(new ArrayList<>());
+
+            for(int j = 0; j < numEq.get(i).size(); j++) {
+                letterFinalEq.get(i).add(numToLetter(numEq.get(i).get(j)));
+            }
+        }
+        return letterFinalEq;
+    }
+
 }

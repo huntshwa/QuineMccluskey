@@ -69,7 +69,16 @@ public class Main {
 
                                 Term addTerm = new Term(newBinRep, curTerm.getOutput(), addOgTerms);
 
-                                newMinterms.get(j).add(addTerm);
+                                boolean seen = false;
+                                for (ArrayList<Term> list : newMinterms.values()) {
+                                    for (Term term : list) {
+                                        if (term.getBinaryRep().equals(addTerm.getBinaryRep())) {
+                                            seen = true;
+                                        }
+                                    }
+                                }
+
+                                if (!seen) newMinterms.get(j).add(addTerm);
                                 merged = true;
                                 curTerm.updateUsed(true);
                                 compTerm.updateUsed(true);
@@ -272,7 +281,6 @@ public class Main {
                 //int number = 1;
                 int number = 0;
                 for (BitSet set : finalEqu) {
-                    System.out.print("Equation " + number + ": ");
 
                     finalEquation.add(new ArrayList<>());
 
@@ -300,12 +308,15 @@ public class Main {
                      */
 
                     number++;
-                    System.out.println();
                 }
             }
 
-            System.out.println(letterEq(finalEquation));
+            for (int j = 0; j < letterEq(finalEquation).size(); j++) {
+                System.out.println("Equation " + (j + 1) + ": " + String.join(" + ", letterEq(finalEquation).get(j)));
+            }
             System.out.println("********************");
+
+            finalEquation.clear();
         }
     }
 
@@ -319,8 +330,8 @@ public class Main {
 
         //Test files and my truth table file
 //        File f = new File("src/WikiTruthTest.csv");
-//        File f = new File("src/TruthTable.csv");
-        File f = new File("src/TruthTableTest.csv");
+        File f = new File("src/TruthTable.csv");
+//        File f = new File("src/TruthTableTest.csv");
 //        File f = new File("src/Petrick.csv");
         s = new Scanner(f);
 

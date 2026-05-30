@@ -14,13 +14,14 @@ public class Main {
         read();
 
         System.out.println("********************");
-        //go through all outputs
+        //go through all outputs of the truth table
         for (int i = 0; i < numOutputs; i++) {
             System.out.println("Output " + (i + 1) + ": ");
             ArrayList<Term> unorderedMinterms = new ArrayList<>();
             ArrayList<Term> realMinterms = new ArrayList<>();
             HashMap<String, int[]> primeImplicants = new HashMap<>();
             HashMap<Integer, ArrayList<Term>> minterms = new HashMap<>();
+
             //adding minterms and dont cares
             for (Term term : terms) {
                 if (term.getOutput()[i].equals("1")) {
@@ -31,7 +32,7 @@ public class Main {
                     unorderedMinterms.add(term);
             }
 
-            //ordering minterms into a hashmap
+            //ordering minterms into a hashmap for Quine-Mccluskey method based on amount of ones in binary representation
             for (int j = 0; j <= numInputs; j++) {
                 minterms.put(j, new ArrayList<>());
             }
@@ -47,7 +48,8 @@ public class Main {
             }
 
 
-            //loop the merge process
+            //loop which keeps on merging terms until no terms have been merged
+            //once no more merges occur, the loop should finish and leave the prime implicants
             boolean iterate = true;
             while (iterate) {
                 boolean merged = false;
@@ -74,6 +76,7 @@ public class Main {
                                     for (Term term : list) {
                                         if (term.getBinaryRep().equals(addTerm.getBinaryRep())) {
                                             seen = true;
+                                            break;
                                         }
                                     }
                                 }
@@ -118,7 +121,7 @@ public class Main {
             HashSet<Integer> tempEssPrimes = new HashSet<>();
             HashMap<String, int[]> essPrimeImplicants = new HashMap<>();
 
-            //making the essential prime implicant table
+            //making the essential prime implicant table to find the most simple equation
             for (String key : primeImplicants.keySet()) {
                 essPrimeTable.put(key, new boolean[realMinterms.size()]);
                 boolean[] row = essPrimeTable.get(key);
@@ -130,8 +133,9 @@ public class Main {
                     }
                 }
             }
+
             /*
-            Prints the prime implicant table
+            //Prints the prime implicant table
             System.out.print("BinRep:" + "   ");
             realMinterms.forEach(term -> System.out.print(term.getOriginalTerms()[0] + "    "));
             System.out.println();
@@ -139,7 +143,9 @@ public class Main {
 
             System.out.println("-----------------------------------------------------");
             */
-            //column major order to find essential minterms
+
+            //traverse the prime implicant table in column major order to find the essential ones
+            //a prime implicant is essential if it is the only term that covers a certain minterm
             for (int c = 0; c < realMinterms.size(); c++) {
                 int count = 0;
                 String binRep = "";
@@ -166,11 +172,14 @@ public class Main {
                 }
             }
 
+            //makes a list of all the needed minterms
             ArrayList<Integer> neededTerms = new ArrayList<>();
             for (Term term : realMinterms) {
                 neededTerms.add(term.getOriginalTerms()[0]);
             }
 
+            //checks if all minterms are covered by the essential prime implicants
+            //if not, then Petricks method is used to find all equations
             if (tempEssPrimes.size() == neededTerms.size()) {
 
                 finalEquation.add(new ArrayList<>());
@@ -185,6 +194,7 @@ public class Main {
 
             } else {
 
+                //finds the missing minterms
                 ArrayList<Integer> missing = new ArrayList<>();
                 for (int neededNum : neededTerms) {
                     boolean contains = false;
@@ -197,6 +207,7 @@ public class Main {
                     if (!contains) missing.add(neededNum);
                 }
 
+                //creates the Petrick table which contains no essential prime implicants
                 HashMap<String, boolean[]> newEssPrimeTable = new HashMap<>();
                 for (String key : primeImplicants.keySet()) {
                     boolean isEss = false;
@@ -220,7 +231,7 @@ public class Main {
 
                 HashMap<BitSet, String> bitToVar = new HashMap<>();
                 HashMap<String, BitSet> varToBit = new HashMap<>();
-
+                //creates a mapping between bit representations and BitSets
                 int count = 0;
                 for (String key : newEssPrimeTable.keySet()) {
                     BitSet bitSet = new BitSet();
@@ -230,7 +241,7 @@ public class Main {
                     count++;
                 }
 
-
+                //creates the Petrick equation, which is a POS expression of all terms which cover a minterm
                 ArrayList<ArrayList<BitSet>> equation = new ArrayList<>();
                 for (int c = 0; c < missing.size(); c++) {
                     ArrayList<BitSet> nestedEqu = new ArrayList<>();
@@ -243,7 +254,8 @@ public class Main {
                 }
 
 
-                //Petricks method
+                //Petricks method to simplify the equation
+                //merges all the terms from the equation into a SOP expression where each list is a possible equation
                 ArrayList<BitSet> tempEqu = equation.getFirst();
 
                 for (int j = 1; j < equation.size(); j++) {
@@ -263,22 +275,23 @@ public class Main {
 
                 int minCard = Integer.MAX_VALUE;
                 ArrayList<BitSet> finalEqu = new ArrayList<>();
-
-                for (int j = 0; j < tempEqu.size(); j++) {
-                    if (tempEqu.get(j).cardinality() < minCard) minCard = tempEqu.get(j).cardinality();
+                //finds the minimum cardinality of a BitSet
+                //uses that to find the possible equation with the least amount of terms
+                for (BitSet bitSet : tempEqu) {
+                    if (bitSet.cardinality() < minCard) minCard = bitSet.cardinality();
                 }
 
-                for (int j = 0; j < tempEqu.size(); j++) {
-                    if (tempEqu.get(j).cardinality() == minCard) finalEqu.add(tempEqu.get(j));
+                for (BitSet bitSet : tempEqu) {
+                    if (bitSet.cardinality() == minCard) finalEqu.add(bitSet);
                 }
 
                 /*
-                Prints Petricks equation and bit to var converter
+                //Prints Petricks equation and bit to var converter
                 System.out.println(bitToVar);
                 System.out.println(finalEqu);
                 System.out.println("-----------------------------------------------------");
                 */
-                //int number = 1;
+
                 int number = 0;
                 for (BitSet set : finalEqu) {
 
@@ -294,8 +307,10 @@ public class Main {
                         }
                     }
 
+                    number++;
 
                     /*
+                    //print raw equations without converting to variables
                     essPrimeImplicants.forEach((key, list) -> System.out.print(key + " + "));
                     int counter = 1;
                     for (BitSet key : bitToVar.keySet()) {
@@ -306,11 +321,10 @@ public class Main {
                         }
                     }
                      */
-
-                    number++;
                 }
             }
 
+            //prints the final equations
             for (int j = 0; j < letterEq(finalEquation).size(); j++) {
                 System.out.println("Equation " + (j + 1) + ": " + String.join(" + ", letterEq(finalEquation).get(j)));
             }

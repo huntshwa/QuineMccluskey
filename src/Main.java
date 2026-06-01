@@ -32,6 +32,12 @@ public class Main {
                     unorderedMinterms.add(term);
             }
 
+            //early check for if an output has no solution
+            if (unorderedMinterms.isEmpty()) {
+                System.out.println("No Equations");
+                continue;
+            }
+
             //ordering minterms into a hashmap for Quine-Mccluskey method based on amount of ones in binary representation
             for (int j = 0; j <= numInputs; j++) {
                 minterms.put(j, new ArrayList<>());

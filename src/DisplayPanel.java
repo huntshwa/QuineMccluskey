@@ -23,8 +23,8 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         JButton updateButton = new JButton("Update Table");
         JButton saveButton = new JButton("Save");
         JButton goButton = new JButton("Go!");
-
-        table = new JTable((int) Math.pow(2, inputVal), inputVal + outputVal);
+        DefaultTableModel model = new DefaultTableModel((int) Math.pow(2, inputVal), inputVal + outputVal); //based on sliders
+        table = new JTable(model);
 
         // create sliders and adjust settings
         inputSlider.setMinorTickSpacing(1);
@@ -76,14 +76,6 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         outputSlider.addChangeListener(this);
     }
 
-    //gonna try to create a truth table
-    public void createTable(int rows, int columns){ //maybe this could just be like 2 values inputted (length x width) rather than a 2d array
-       //rows = 2 ^ input slider listener;
-        //columns = slider listener;
-        DefaultTableModel rowCol = new DefaultTableModel(rows, columns);
-        JTable table = new JTable(rowCol);
-    }
-
     @Override
     public void paintComponent(Graphics g){
         super.paintComponent(g);
@@ -99,7 +91,14 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
             String text = button.getText();
 
             if (text.equals("Update Table")) {
-                table = new JTable((int) Math.pow(2, inputSlider.getValue()), inputSlider.getValue() + outputSlider.getValue());
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
+                model.setColumnCount(inputSlider.getValue() + outputSlider.getValue());
+                model.setRowCount((int) Math.pow(2, inputSlider.getValue()));
+                table.doLayout();
+            } else if (text.equals("Save")) {
+                System.out.println();
+            } else if (text.equals("Go!")) {
+                System.out.println();
             }
         }
     }

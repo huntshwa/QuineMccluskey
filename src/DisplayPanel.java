@@ -8,19 +8,13 @@ import java.awt.event.*;
 
 
 public class DisplayPanel extends JPanel implements ActionListener, ChangeListener {
-    private int min;
-    private int max;
-    private int start;
     private JTable table;
     private JSlider outputSlider;
     private JSlider inputSlider;
 
     public DisplayPanel() {
-        min = 1; //can't have less than 1 input
-        max = 20; //inefficient with more than 20, letter transformation stops at 26
-        start = 4; //four variables is a basic start
 
-        inputSlider = new JSlider(min, max, start);
+        inputSlider = new JSlider(1, 20, 4); //can't have less than 1 input, inefficient with more than 20, letter transformation stops at 26, four is common
         outputSlider = new JSlider(1, 20, 1); //need at least one output, prob don't need more than 20 (can be changed), one is common
         int outputVal = outputSlider.getValue();
         int inputVal = inputSlider.getValue();
@@ -64,10 +58,10 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         // creating a third panel to place slider and bottom panels vertically
         // (allows two rows of UI elements to be displayed)
         JPanel combinedPanels = new JPanel();
-        combinedPanels.setLayout(new GridLayout(2, 1));
+        combinedPanels.setLayout(new GridLayout(2, 2));
         combinedPanels.add(sliderPanel, BorderLayout.NORTH);
-        combinedPanels.add(tablePanel, BorderLayout.EAST);
-        combinedPanels.add(buttonPanel, BorderLayout.SOUTH);
+        combinedPanels.add(tablePanel, BorderLayout.CENTER);
+        combinedPanels.add(buttonPanel, BorderLayout.EAST);
 
         add(combinedPanels, BorderLayout.SOUTH);
 

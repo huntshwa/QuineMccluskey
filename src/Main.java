@@ -47,7 +47,6 @@ public class Main {
                 minterms.get(count).add(term);
             }
 
-
             //loop which keeps on merging terms until no terms have been merged
             //once no more merges occur, the loop should finish and leave the prime implicants
             boolean iterate = true;
@@ -85,7 +84,6 @@ public class Main {
                                 merged = true;
                                 curTerm.updateUsed(true);
                                 compTerm.updateUsed(true);
-
                             }
                         }
                     }
@@ -110,11 +108,11 @@ public class Main {
                 }
             }
 
-            /*
+
             //Prints all prime implicants
             primeImplicants.forEach((key, list) -> System.out.println(key + " : " + Arrays.toString(list)));
             System.out.println("-----------------------------------------------------");
-             */
+
 
 
             HashMap<String, boolean[]> essPrimeTable = new HashMap<>();
@@ -344,9 +342,10 @@ public class Main {
 
         //Test files and my truth table file
 //        File f = new File("src/WikiTruthTest.csv");
-        File f = new File("src/TruthTable.csv");
+//        File f = new File("src/BigTruthTable.csv");
 //        File f = new File("src/TruthTableTest.csv");
 //        File f = new File("src/Petrick.csv");
+        File f = new File("src/BabyTruthTable.csv");
         s = new Scanner(f);
 
         terms = new Term[numTerms];

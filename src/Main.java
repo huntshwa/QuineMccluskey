@@ -54,6 +54,12 @@ public class Main {
                 boolean merged = false;
                 HashMap<Integer, ArrayList<Term>> newMinterms = new HashMap<>();
 
+                for (ArrayList<Term> list : minterms.values()) {
+                    for (Term term : list) {
+                        term.updateUsed(false);
+                    }
+                }
+
                 for (int j = 0; j <= numInputs; j++) {
                     newMinterms.put(j, new ArrayList<>());
                 }
@@ -91,6 +97,7 @@ public class Main {
                 }
 
                 iterate = merged;
+
                 for (ArrayList<Term> termList : minterms.values()) {
                     for (Term term : termList) {
                         if (!term.getUsed()) {
@@ -99,21 +106,23 @@ public class Main {
                     }
                 }
 
-                minterms = newMinterms;
+                boolean emptyLists = true;
 
-                for (ArrayList<Term> list : minterms.values()) {
-                    for (Term term : list) {
-                        term.updateUsed(false);
+                for (ArrayList<Term> list ; newMinterms){
+                    if (!list.isEmpty()) {
+                        emptyLists = false;
+                        break;
                     }
                 }
+                if (!emptyLists) minterms = newMinterms;
             }
 
-
+            /*
             //Prints all prime implicants
             primeImplicants.forEach((key, list) -> System.out.println(key + " : " + Arrays.toString(list)));
             System.out.println("-----------------------------------------------------");
-
-
+            */
+            System.out.println(minterms);
 
             HashMap<String, boolean[]> essPrimeTable = new HashMap<>();
             HashSet<Integer> tempEssPrimes = new HashSet<>();
@@ -345,7 +354,8 @@ public class Main {
 //        File f = new File("src/BigTruthTable.csv");
 //        File f = new File("src/TruthTableTest.csv");
 //        File f = new File("src/Petrick.csv");
-        File f = new File("src/BabyTruthTable.csv");
+//        File f = new File("src/BabyTruthTable.csv");
+        File f = new File("src/Kaiya.csv");
         s = new Scanner(f);
 
         terms = new Term[numTerms];

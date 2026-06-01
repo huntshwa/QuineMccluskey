@@ -108,12 +108,13 @@ public class Main {
 
                 boolean emptyLists = true;
 
-                for (ArrayList<Term> list ; newMinterms){
+                for (ArrayList<Term> list : newMinterms.values()) {
                     if (!list.isEmpty()) {
                         emptyLists = false;
                         break;
                     }
                 }
+
                 if (!emptyLists) minterms = newMinterms;
             }
 
@@ -122,7 +123,6 @@ public class Main {
             primeImplicants.forEach((key, list) -> System.out.println(key + " : " + Arrays.toString(list)));
             System.out.println("-----------------------------------------------------");
             */
-            System.out.println(minterms);
 
             HashMap<String, boolean[]> essPrimeTable = new HashMap<>();
             HashSet<Integer> tempEssPrimes = new HashSet<>();
@@ -351,11 +351,10 @@ public class Main {
 
         //Test files and my truth table file
 //        File f = new File("src/WikiTruthTest.csv");
-//        File f = new File("src/BigTruthTable.csv");
+        File f = new File("src/BigTruthTable.csv");
 //        File f = new File("src/TruthTableTest.csv");
 //        File f = new File("src/Petrick.csv");
 //        File f = new File("src/BabyTruthTable.csv");
-        File f = new File("src/Kaiya.csv");
         s = new Scanner(f);
 
         terms = new Term[numTerms];
@@ -455,6 +454,7 @@ public class Main {
      */
     public static String numToLetter(String binRep) {
         String result = "";
+        int dashCount = 0;
 
         for (int i = 0; i < binRep.length(); i++) {
             char curChar = binRep.charAt(i);
@@ -464,8 +464,10 @@ public class Main {
                 if (curChar == '0') {
                     result += "'";
                 }
-            }
+            } else dashCount++;
         }
+
+        if (dashCount == binRep.length()) result += "1";
 
         return result;
     }

@@ -11,11 +11,17 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
     private JTable table;
     private JSlider outputSlider;
     private JSlider inputSlider;
+    private JScrollBar horzScroller;
+    private JScrollBar vertScroller;
 
     public DisplayPanel() {
 
         inputSlider = new JSlider(1, 20, 4); //can't have less than 1 input, inefficient with more than 20, letter transformation stops at 26, four is common
         outputSlider = new JSlider(1, 20, 1); //need at least one output, prob don't need more than 20 (can be changed), one is common
+
+        inputSlider.setPreferredSize(new Dimension(200, 25));
+        outputSlider.setPreferredSize(new Dimension(200, 25));
+
         int outputVal = outputSlider.getValue();
         int inputVal = inputSlider.getValue();
 
@@ -25,6 +31,13 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         JButton goButton = new JButton("Go!");
         DefaultTableModel model = new DefaultTableModel((int) Math.pow(2, inputVal), inputVal + outputVal); //based on sliders
         table = new JTable(model);
+
+        // create the scroller
+        horzScroller = new JScrollBar(JScrollBar.HORIZONTAL);
+        vertScroller = new JScrollBar(JScrollBar.VERTICAL);
+        horzScroller.setPreferredSize(new Dimension(100, 10));
+        vertScroller.setPreferredSize(new Dimension(10, 100));
+//        vertScroller.
 
         // create sliders and adjust settings
         inputSlider.setMinorTickSpacing(1);
@@ -39,7 +52,21 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         // create a panel for organizing the label and slider
         JPanel sliderPanel = new JPanel();
 
+        JLabel inputLabel = new JLabel("Inputs");
+        JLabel outputLabel = new JLabel("Outputs");
+
+        sliderPanel.add(outputSlider);
+
+        inputLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        inputSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
+        outputLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        outputSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.Y_AXIS));
+
+        sliderPanel.add(inputLabel);
         sliderPanel.add(inputSlider);
+        sliderPanel.add(outputLabel);
         sliderPanel.add(outputSlider);
 
         // create a panel for organizing the components at the bottom
@@ -54,13 +81,15 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         JPanel tablePanel = new JPanel();
 
         tablePanel.add(table);
+        tablePanel.add(horzScroller, BorderLayout.CENTER);
+        tablePanel.add(vertScroller, BorderLayout.CENTER);
 
         // creating a third panel to place slider and bottom panels vertically
         // (allows two rows of UI elements to be displayed)
         JPanel combinedPanels = new JPanel();
         combinedPanels.setLayout(new GridLayout(2, 2));
         combinedPanels.add(sliderPanel, BorderLayout.NORTH);
-        combinedPanels.add(tablePanel, BorderLayout.CENTER);
+        combinedPanels.add(tablePanel, BorderLayout.WEST);
         combinedPanels.add(buttonPanel, BorderLayout.EAST);
 
         add(combinedPanels, BorderLayout.SOUTH);
@@ -102,6 +131,11 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
             }
         }
     }
+
+//    @Override
+//    public void adjustTable(AdjustmentEvent e) {
+//
+//    }
 
     @Override
     public void stateChanged(ChangeEvent e) {

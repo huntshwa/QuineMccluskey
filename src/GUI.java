@@ -12,8 +12,5 @@ public class GUI {
         frame.add(panel);
 
         frame.setVisible(true);
-
-
-
     }
 }

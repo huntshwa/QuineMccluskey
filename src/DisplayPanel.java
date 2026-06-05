@@ -5,41 +5,21 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.FileNotFoundException;
 
 
 public class DisplayPanel extends JPanel implements ActionListener, ChangeListener {
     private JTable table;
     private JSlider outputSlider;
     private JSlider inputSlider;
-    private JScrollBar horzScroller;
-    private JScrollBar vertScroller;
+    private JTextArea outputText;
 
     public DisplayPanel() {
 
+        //create sliders
         inputSlider = new JSlider(1, 20, 4); //can't have less than 1 input, inefficient with more than 20, letter transformation stops at 26, four is common
         outputSlider = new JSlider(1, 20, 1); //need at least one output, prob don't need more than 20 (can be changed), one is common
 
-        inputSlider.setPreferredSize(new Dimension(200, 25));
-        outputSlider.setPreferredSize(new Dimension(200, 25));
-
-        int outputVal = outputSlider.getValue();
-        int inputVal = inputSlider.getValue();
-
-        // create the buttons
-        JButton updateButton = new JButton("Update Table");
-        JButton saveButton = new JButton("Save");
-        JButton goButton = new JButton("Go!");
-        DefaultTableModel model = new DefaultTableModel((int) Math.pow(2, inputVal), inputVal + outputVal); //based on sliders
-        table = new JTable(model);
-
-        // create the scroller
-        horzScroller = new JScrollBar(JScrollBar.HORIZONTAL);
-        vertScroller = new JScrollBar(JScrollBar.VERTICAL);
-        horzScroller.setPreferredSize(new Dimension(100, 10));
-        vertScroller.setPreferredSize(new Dimension(10, 100));
-//        vertScroller.
-
-        // create sliders and adjust settings
         inputSlider.setMinorTickSpacing(1);
         inputSlider.setMajorTickSpacing(5);
         outputSlider.setMinorTickSpacing(1);
@@ -49,60 +29,72 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         outputSlider.setPaintTicks(true);
         outputSlider.setPaintLabels(true);
 
-        // create a panel for organizing the label and slider
-        JPanel sliderPanel = new JPanel();
+        int outputVal = outputSlider.getValue();
+        int inputVal = inputSlider.getValue();
 
+        //creating labels for sliders
         JLabel inputLabel = new JLabel("Inputs");
         JLabel outputLabel = new JLabel("Outputs");
 
-        sliderPanel.add(outputSlider);
+        //create the buttons
+        JButton updateButton = new JButton("Update Table");
+        JButton saveButton = new JButton("Save");
+        JButton goButton = new JButton("Go!");
+        JButton clearButton = new JButton("Clear Table");
+
+        //create table
+        DefaultTableModel model = new DefaultTableModel((int) Math.pow(2, inputVal), inputVal + outputVal); //based on sliders
+        table = new JTable(model);
+
+        JPanel controlPanel = new JPanel();
+        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
+        controlPanel.setPreferredSize(new Dimension(200, 580));
+
+        controlPanel.add(inputLabel);
+        controlPanel.add(inputSlider);
+        controlPanel.add(Box.createVerticalStrut(15));
+
+        controlPanel.add(outputLabel);
+        controlPanel.add(outputSlider);
+        controlPanel.add(Box.createVerticalStrut(15));
 
         inputLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         inputSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
         outputLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         outputSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.Y_AXIS));
 
-        sliderPanel.add(inputLabel);
-        sliderPanel.add(inputSlider);
-        sliderPanel.add(outputLabel);
-        sliderPanel.add(outputSlider);
+        //add bottom components to the panel, in left-to-right order
+        controlPanel.add(updateButton);
+        controlPanel.add(clearButton);
+        controlPanel.add(saveButton);
+        controlPanel.add(goButton);
 
-        // create a panel for organizing the components at the bottom
-        JPanel buttonPanel = new JPanel(); // a "panel" is not visible
+        //create a panel for the table
+        JScrollPane tableScrollPlane = new JScrollPane(table);
 
-        // add bottom components to the panel, in left-to-right order
-        buttonPanel.add(updateButton);
-        buttonPanel.add(saveButton);
-        buttonPanel.add(goButton);
-
-        // create a panel for the table
-        JPanel tablePanel = new JPanel();
-
-        tablePanel.add(table);
-        tablePanel.add(horzScroller, BorderLayout.CENTER);
-        tablePanel.add(vertScroller, BorderLayout.CENTER);
-
-        // creating a third panel to place slider and bottom panels vertically
-        // (allows two rows of UI elements to be displayed)
+        //formatting panel for throwing everything together
         JPanel combinedPanels = new JPanel();
-        combinedPanels.setLayout(new GridLayout(2, 2));
-        combinedPanels.add(sliderPanel, BorderLayout.NORTH);
-        combinedPanels.add(tablePanel, BorderLayout.WEST);
-        combinedPanels.add(buttonPanel, BorderLayout.EAST);
+        combinedPanels.setLayout(new BorderLayout());
+
+        combinedPanels.add(controlPanel, BorderLayout.EAST);
+        combinedPanels.add(tableScrollPlane, BorderLayout.WEST);
 
         add(combinedPanels, BorderLayout.SOUTH);
 
-        // --- SETTING UP EVENT HANDLING ----
-        //setting up buttons to use ActionListener interface and actionPerformed method
+        //adding buttons to action listener
         goButton.addActionListener(this);
         updateButton.addActionListener(this);
         saveButton.addActionListener(this);
+        clearButton.addActionListener(this);
 
         //setting up slider to use ChangeListener interface and stateChanged method
         inputSlider.addChangeListener(this);
         outputSlider.addChangeListener(this);
+    }
+
+    public int getNumInputs() {
+        return inputSlider.getValue();
     }
 
     @Override
@@ -125,17 +117,31 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
                 model.setRowCount((int) Math.pow(2, inputSlider.getValue()));
                 table.doLayout();
             } else if (text.equals("Save")) {
-                System.out.println();
+                System.out.println("Saved");
             } else if (text.equals("Go!")) {
-                System.out.println();
+                Algorithm.setNumInputs(inputSlider.getValue());
+                try {
+                    Algorithm.runAlgorithm();
+                } catch (FileNotFoundException ex) {
+                    throw new RuntimeException(ex);
+                }
+            } else if (text.equals("Clear Table")) {
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
+                model.setColumnCount(0);
+                model.setRowCount(0);
+                table.doLayout();
+
+                inputSlider.setValue(4);
+                outputSlider.setValue(1);
+
+                model.setColumnCount(inputSlider.getValue() + outputSlider.getValue());
+                model.setRowCount((int) Math.pow(2, inputSlider.getValue()));
+                table.doLayout();
             }
         }
     }
 
-//    @Override
-//    public void adjustTable(AdjustmentEvent e) {
-//
-//    }
+    public void displayOutput( )
 
     @Override
     public void stateChanged(ChangeEvent e) {

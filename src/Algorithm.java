@@ -2,7 +2,7 @@ import java.io.FileNotFoundException;
 import java.util.*;
 import java.io.File;
 
-public class Main {
+public class Algorithm {
 
     private static int numInputs;
     private static int numOutputs;
@@ -10,7 +10,7 @@ public class Main {
     private static Term[] terms;
     private static ArrayList<ArrayList<String>> finalEquation = new ArrayList<>();
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void runAlgorithm() throws FileNotFoundException {
         read();
 
         System.out.println("********************");
@@ -348,20 +348,21 @@ public class Main {
     }
 
     public static void read() throws FileNotFoundException{
-        Scanner s = new Scanner(System.in);
-
-        System.out.println("Enter the amount of inputs: ");
-
-        numInputs = s.nextInt();
+//        Scanner s = new Scanner(System.in);
+//
+//        System.out.println("Enter the amount of inputs: ");
+//
+//        numInputs = s.nextInt();
         numTerms = (int) Math.pow(2, numInputs);
 
         //Test files and my truth table file
 //        File f = new File("src/WikiTruthTest.csv");
-        File f = new File("src/BigTruthTable.csv");
+//        File f = new File("src/BigTruthTable.csv");
 //        File f = new File("src/TruthTableTest.csv");
 //        File f = new File("src/Petrick.csv");
 //        File f = new File("src/BabyTruthTable.csv");
-        s = new Scanner(f);
+        File f = new File("src/WriteTable.csv");
+        Scanner s = new Scanner(f);
 
         terms = new Term[numTerms];
 
@@ -404,6 +405,14 @@ public class Main {
         }
 
         return newArr;
+    }
+
+    public static void setNumInputs(int numberOfInputs) {
+        numInputs = numberOfInputs;
+    }
+
+    public static String getFinalEquation() {
+        return String.join(" + ", letterEq(finalEquation).get(0));
     }
 
     public static ArrayList<BitSet> bitListMerge(ArrayList<BitSet> list1, ArrayList<BitSet> list2) {

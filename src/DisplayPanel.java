@@ -141,7 +141,7 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         }
     }
 
-    public void displayOutput( )
+//    public void displayOutput( )
 
     @Override
     public void stateChanged(ChangeEvent e) {

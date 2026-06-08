@@ -200,11 +200,6 @@ public class Algorithm {
                     finalEquation.getFirst().add(key);
                 }
 
-                /*
-                String equation = String.join(" + ", essPrimeImplicants.keySet());
-                System.out.println("Equation: " + equation);
-                 */
-
             } else {
 
                 //finds the missing minterms
@@ -321,19 +316,6 @@ public class Algorithm {
                     }
 
                     number++;
-
-                    /*
-                    //print raw equations without converting to variables
-                    essPrimeImplicants.forEach((key, list) -> System.out.print(key + " + "));
-                    int counter = 1;
-                    for (BitSet key : bitToVar.keySet()) {
-                        if (set.intersects(key)) {
-                            if (counter == set.cardinality()) System.out.print(bitToVar.get(key));
-                            else System.out.print(bitToVar.get(key) + " + ");
-                            counter++;
-                        }
-                    }
-                     */
                 }
             }
 
@@ -348,19 +330,10 @@ public class Algorithm {
     }
 
     public static void read() throws FileNotFoundException{
-//        Scanner s = new Scanner(System.in);
-//
-//        System.out.println("Enter the amount of inputs: ");
-//
-//        numInputs = s.nextInt();
+
         numTerms = (int) Math.pow(2, numInputs);
 
-        //Test files and my truth table file
-//        File f = new File("src/WikiTruthTest.csv");
-//        File f = new File("src/BigTruthTable.csv");
-//        File f = new File("src/TruthTableTest.csv");
-//        File f = new File("src/Petrick.csv");
-//        File f = new File("src/BabyTruthTable.csv");
+        //Read file
         File f = new File("src/WriteTable.csv");
         Scanner s = new Scanner(f);
 

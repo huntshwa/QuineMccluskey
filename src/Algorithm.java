@@ -13,10 +13,8 @@ public class Algorithm {
     public static void runAlgorithm() throws FileNotFoundException {
         read();
 
-        System.out.println("********************");
         //go through all outputs of the truth table
         for (int i = 0; i < numOutputs; i++) {
-            System.out.println("Output " + (i + 1) + ": ");
             ArrayList<Term> unorderedMinterms = new ArrayList<>();
             ArrayList<Term> realMinterms = new ArrayList<>();
             HashMap<String, int[]> primeImplicants = new HashMap<>();
@@ -34,7 +32,7 @@ public class Algorithm {
 
             //early check for if an output has no solution
             if (unorderedMinterms.isEmpty()) {
-                System.out.println("No Equations");
+                DisplayPanel.updateOutputs("No Equations");
                 continue;
             }
 
@@ -319,11 +317,7 @@ public class Algorithm {
                 }
             }
 
-            //prints the final equations
-            for (int j = 0; j < letterEq(finalEquation).size(); j++) {
-                System.out.println("Equation " + (j + 1) + ": " + String.join(" + ", letterEq(finalEquation).get(j)));
-            }
-            System.out.println("********************");
+            DisplayPanel.updateOutputs("Equation: " + String.join(" + ", letterEq(finalEquation).get(0)));
 
             finalEquation.clear();
         }
@@ -338,10 +332,6 @@ public class Algorithm {
         Scanner s = new Scanner(f);
 
         terms = new Term[numTerms];
-
-        //get to numbers
-        s.nextLine();
-        s.nextLine();
 
         //iterate through the whole file
         int j = 0;

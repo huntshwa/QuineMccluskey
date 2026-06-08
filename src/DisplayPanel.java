@@ -6,13 +6,15 @@ import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 
 public class DisplayPanel extends JPanel implements ActionListener, ChangeListener {
-    private JTable table;
+    private static JTable table;
     private JSlider outputSlider;
     private JSlider inputSlider;
     private JTextArea outputText;
+    private static ArrayList<String> outputs;
 
     public DisplayPanel() {
 
@@ -97,6 +99,14 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         return inputSlider.getValue();
     }
 
+    public static void updateOutputs(String output) {
+        outputs.add(output);
+    }
+
+    public static ArrayList<String> getOutputs() {
+        return outputs;
+    }
+
     @Override
     public void paintComponent(Graphics g){
         super.paintComponent(g);
@@ -142,6 +152,14 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
     }
 
 //    public void displayOutput( )
+
+    public static void writeTable() {
+        for (int i = 0; i < table.getRowCount(); i++) {
+            for (int j = 0; j < table.getColumnCount(); j++) {
+                table.getValueAt(i, j)
+            }
+        }
+    }
 
     @Override
     public void stateChanged(ChangeEvent e) {

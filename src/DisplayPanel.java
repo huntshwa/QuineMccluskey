@@ -19,10 +19,10 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
     private JTextArea outputText;
     private static ArrayList<String> outputs;
 
-    public DisplayPanel() {
+    public DisplayPanel() throws IOException {
 
         //create sliders
-        inputSlider = new JSlider(1, 20, 4); //can't have less than 1 input, inefficient with more than 20, letter transformation stops at 26, four is common
+        inputSlider = new JSlider(1, 10, 4); //can't have less than 1 input, inefficient with more than 15, letter transformation stops at 26, four is common
         outputSlider = new JSlider(1, 20, 1); //need at least one output, prob don't need more than 20 (can be changed), one is common
 
         inputSlider.setMinorTickSpacing(1);
@@ -45,11 +45,12 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         JButton updateButton = new JButton("Update Table");
         JButton saveButton = new JButton("Save");
         JButton goButton = new JButton("Go!");
-        JButton clearButton = new JButton("Clear Table");
 
         //create table
         DefaultTableModel model = new DefaultTableModel((int) Math.pow(2, inputVal), inputVal + outputVal); //based on sliders
         table = new JTable(model);
+
+        doInputs(model, inputSlider);
 
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
@@ -71,7 +72,6 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
 
         //add bottom components to the panel, in left-to-right order
         controlPanel.add(updateButton);
-        controlPanel.add(clearButton);
         controlPanel.add(saveButton);
         controlPanel.add(goButton);
 
@@ -87,15 +87,17 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
 
         add(combinedPanels, BorderLayout.SOUTH);
 
+        FileWriter fw = new FileWriter("src/WriteTable.csv", false);
+
         //adding buttons to action listener
         goButton.addActionListener(this);
         updateButton.addActionListener(this);
         saveButton.addActionListener(this);
-        clearButton.addActionListener(this);
 
         //setting up slider to use ChangeListener interface and stateChanged method
         inputSlider.addChangeListener(this);
         outputSlider.addChangeListener(this);
+
     }
 
     public int getNumInputs() {
@@ -126,9 +128,14 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
 
             if (text.equals("Update Table")) {
                 DefaultTableModel model = (DefaultTableModel) table.getModel();
+                clearTable(table, inputSlider, outputSlider);
+
                 model.setColumnCount(inputSlider.getValue() + outputSlider.getValue());
                 model.setRowCount((int) Math.pow(2, inputSlider.getValue()));
                 table.doLayout();
+
+                doInputs(model, inputSlider);
+
             } else if (text.equals("Save")) {
                 try {
                     writeTable();
@@ -143,25 +150,43 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
                 } catch (FileNotFoundException ex) {
                     throw new RuntimeException(ex);
                 }
-            } else if (text.equals("Clear Table")) {
-                DefaultTableModel model = (DefaultTableModel) table.getModel();
-                model.setColumnCount(0);
-                model.setRowCount(0);
-                table.doLayout();
 
-                inputSlider.setValue(4);
-                outputSlider.setValue(1);
+//                JPanel outputScreen = new JPanel();
+//                outputScreen.add(outputText);
 
-                model.setColumnCount(inputSlider.getValue() + outputSlider.getValue());
-                model.setRowCount((int) Math.pow(2, inputSlider.getValue()));
-                table.doLayout();
             }
         }
     }
 
 //    public void displayOutput( )
 
+    public static void doInputs(DefaultTableModel model, JSlider slider) {
+        for (int row = 0; row < model.getRowCount(); row++) {
+            String binary = Integer.toBinaryString(row);
+
+            while (binary.length() < slider.getValue()) {
+                binary = "0" + binary;
+            }
+
+            for (int col = slider.getValue() - 1; col >= 0; col--) {
+                if (col >= binary.length()) {
+                    model.setValueAt(0, row, col);
+                } else {
+                    model.setValueAt(Integer.parseInt(String.valueOf(binary.charAt(col))), row, col);
+                }
+            }
+        }
+    }
+
+    public static void clearTable(JTable table, JSlider slider1, JSlider slider2) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        model.setColumnCount(0);
+        model.setRowCount(0);
+        table.doLayout();
+    }
+
     public static void writeTable() throws IOException {
+        FileWriter fw = new FileWriter("src/WriteTable.csv", false);
         BufferedWriter writer = new BufferedWriter(new FileWriter("src/WriteTable.csv"));
         DefaultTableModel model = (DefaultTableModel) table.getModel();
             for (int i = 0; i < model.getRowCount(); i++) {
@@ -179,7 +204,7 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
                 }
                 writer.newLine();
             }
-        System.out.println("finished");
+        writer.close();
     }
 
     @Override

@@ -319,6 +319,8 @@ public class Algorithm {
 
             DisplayPanel.updateOutputs("Equation: " + String.join(" + ", letterEq(finalEquation).get(0)));
 
+            System.out.println(DisplayPanel.getOutputs());
+
             finalEquation.clear();
         }
     }

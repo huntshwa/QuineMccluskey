@@ -162,13 +162,24 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
 //    public void displayOutput( )
 
     public static void writeTable() throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter("WriteTable.csv"));
-            for (int i = 0; i < table.getRowCount(); i++) {
-                for (int j = 0; j < table.getColumnCount(); j++) {
-                    writer.write((Integer) table.getValueAt(i, j));
+        BufferedWriter writer = new BufferedWriter(new FileWriter("src/WriteTable.csv"));
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+            for (int i = 0; i < model.getRowCount(); i++) {
+                for (int j = 0; j < model.getColumnCount(); j++) {
+                    Object value = model.getValueAt(i, j);
+                    if (value != null) {
+                        if (j == model.getColumnCount() - 1) {
+                            writer.write((String) value);
+                        } else {
+                            writer.write(value + ",");
+                        }
+                    } else {
+                        writer.write("0");
+                    }
                 }
                 writer.newLine();
             }
+        System.out.println("finished");
     }
 
     @Override

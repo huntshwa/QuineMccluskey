@@ -158,7 +158,11 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         }
     }
 
-//    public void displayOutput( )
+//    public void displayOutput( ) {
+//        for(String output : outputs) {
+//            outputText.append(output + "+");
+//        }
+//    }
 
     public static void doInputs(DefaultTableModel model, JSlider slider) {
         for (int row = 0; row < model.getRowCount(); row++) {

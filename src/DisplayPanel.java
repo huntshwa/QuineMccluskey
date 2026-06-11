@@ -7,6 +7,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 
 public class DisplayPanel extends JPanel implements ActionListener, ChangeListener {
@@ -127,6 +130,11 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
                 model.setRowCount((int) Math.pow(2, inputSlider.getValue()));
                 table.doLayout();
             } else if (text.equals("Save")) {
+                try {
+                    writeTable();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
                 System.out.println("Saved");
             } else if (text.equals("Go!")) {
                 Algorithm.setNumInputs(inputSlider.getValue());
@@ -153,12 +161,14 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
 
 //    public void displayOutput( )
 
-    public static void writeTable() {
-        for (int i = 0; i < table.getRowCount(); i++) {
-            for (int j = 0; j < table.getColumnCount(); j++) {
-                table.getValueAt(i, j)
+    public static void writeTable() throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter("WriteTable.csv"));
+            for (int i = 0; i < table.getRowCount(); i++) {
+                for (int j = 0; j < table.getColumnCount(); j++) {
+                    writer.write((Integer) table.getValueAt(i, j));
+                }
+                writer.newLine();
             }
-        }
     }
 
     @Override

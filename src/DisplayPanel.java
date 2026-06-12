@@ -10,25 +10,26 @@ import java.util.ArrayList;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.awt.Font;
 
 
 public class DisplayPanel extends JPanel implements ActionListener, ChangeListener {
     private static JTable table;
     private JSlider outputSlider;
     private JSlider inputSlider;
-    private JTextArea outputText;
-    private static ArrayList<String> outputs;
+    private JTextArea outputText = new JTextArea("No Equations");
+    private static ArrayList<String> outputs = new ArrayList<>();
 
-    public DisplayPanel() throws IOException {
+    public DisplayPanel() {
 
         //create sliders
-        inputSlider = new JSlider(1, 10, 4); //can't have less than 1 input, inefficient with more than 15, letter transformation stops at 26, four is common
-        outputSlider = new JSlider(1, 20, 1); //need at least one output, prob don't need more than 20 (can be changed), one is common
+        inputSlider = new JSlider(1, 5, 4); //can't have less than 1 input, inefficient with more than 15, letter transformation stops at 26, four is common
+        outputSlider = new JSlider(1, 5, 1); //need at least one output, prob don't need more than 15 (can be changed), one is common
 
         inputSlider.setMinorTickSpacing(1);
-        inputSlider.setMajorTickSpacing(5);
+        inputSlider.setMajorTickSpacing(1);
         outputSlider.setMinorTickSpacing(1);
-        outputSlider.setMajorTickSpacing(5);
+        outputSlider.setMajorTickSpacing(1);
         inputSlider.setPaintTicks(true);
         inputSlider.setPaintLabels(true);
         outputSlider.setPaintTicks(true);
@@ -52,9 +53,13 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
 
         doInputs(model, inputSlider);
 
+        //setting up the button and slider panel
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
-        controlPanel.setPreferredSize(new Dimension(200, 580));
+        controlPanel.setPreferredSize(new Dimension(300, 520));
+
+        //adding components
+        controlPanel.add(Box.createVerticalStrut(20));
 
         controlPanel.add(inputLabel);
         controlPanel.add(inputSlider);
@@ -64,6 +69,7 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         controlPanel.add(outputSlider);
         controlPanel.add(Box.createVerticalStrut(15));
 
+        //aligning labels
         inputLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         inputSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
         outputLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -75,19 +81,28 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         controlPanel.add(saveButton);
         controlPanel.add(goButton);
 
-        //create a panel for the table
-        JScrollPane tableScrollPlane = new JScrollPane(table);
+        //create a scroll plane for the table
+        JScrollPane tableScrollPane = new JScrollPane(table);
+
+        //output scroll plane
+        JScrollPane outputScrollPane = new JScrollPane(outputText);
+        outputText.setEditable(false);
+
+        Font font = new Font("Ariel", Font.PLAIN, 14);
+        outputText.setFont(font);
+
+        controlPanel.add(Box.createVerticalStrut(50));
+        controlPanel.add(outputScrollPane);
 
         //formatting panel for throwing everything together
         JPanel combinedPanels = new JPanel();
         combinedPanels.setLayout(new BorderLayout());
 
         combinedPanels.add(controlPanel, BorderLayout.EAST);
-        combinedPanels.add(tableScrollPlane, BorderLayout.WEST);
+        combinedPanels.add(Box.createHorizontalStrut(20));
+        combinedPanels.add(tableScrollPane, BorderLayout.WEST);
 
         add(combinedPanels, BorderLayout.SOUTH);
-
-        FileWriter fw = new FileWriter("src/WriteTable.csv", false);
 
         //adding buttons to action listener
         goButton.addActionListener(this);
@@ -100,23 +115,15 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
 
     }
 
-    public int getNumInputs() {
-        return inputSlider.getValue();
-    }
-
     public static void updateOutputs(String output) {
         outputs.add(output);
-    }
-
-    public static ArrayList<String> getOutputs() {
-        return outputs;
     }
 
     @Override
     public void paintComponent(Graphics g){
         super.paintComponent(g);
 
-        g.drawString("Truth Table", 50, 30);
+        g.drawString("Truth Table", 10, 30);
     }
 
     @Override
@@ -142,27 +149,21 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
-                System.out.println("Saved");
             } else if (text.equals("Go!")) {
+                outputs.clear();
                 Algorithm.setNumInputs(inputSlider.getValue());
                 try {
                     Algorithm.runAlgorithm();
                 } catch (FileNotFoundException ex) {
                     throw new RuntimeException(ex);
                 }
-
-//                JPanel outputScreen = new JPanel();
-//                outputScreen.add(outputText);
-
+                for (int i = 0; i < outputs.size(); i++) {
+                    outputs.set(i, outputs.get(i).substring(0, 8) + " " + table.getModel().getColumnName(i + inputSlider.getValue()) + outputs.get(i).substring(8));
+                }
+                outputText.setText(String.join("\n", outputs));
             }
         }
     }
-
-//    public void displayOutput( ) {
-//        for(String output : outputs) {
-//            outputText.append(output + "+");
-//        }
-//    }
 
     public static void doInputs(DefaultTableModel model, JSlider slider) {
         for (int row = 0; row < model.getRowCount(); row++) {
@@ -190,7 +191,6 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
     }
 
     public static void writeTable() throws IOException {
-        FileWriter fw = new FileWriter("src/WriteTable.csv", false);
         BufferedWriter writer = new BufferedWriter(new FileWriter("src/WriteTable.csv"));
         DefaultTableModel model = (DefaultTableModel) table.getModel();
             for (int i = 0; i < model.getRowCount(); i++) {
@@ -203,7 +203,11 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
                             writer.write(value + ",");
                         }
                     } else {
-                        writer.write("0");
+                        if (j == model.getColumnCount() - 1) {
+                            writer.write("0");
+                        } else {
+                            writer.write("0" + ",");
+                        }
                     }
                 }
                 writer.newLine();

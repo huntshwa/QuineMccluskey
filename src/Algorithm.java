@@ -319,14 +319,11 @@ public class Algorithm {
 
             DisplayPanel.updateOutputs("Equation: " + String.join(" + ", letterEq(finalEquation).get(0)));
 
-            System.out.println(DisplayPanel.getOutputs());
-
             finalEquation.clear();
         }
     }
 
     public static void read() throws FileNotFoundException{
-
         numTerms = (int) Math.pow(2, numInputs);
 
         //Read file

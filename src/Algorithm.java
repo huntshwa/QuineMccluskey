@@ -373,6 +373,10 @@ public class Algorithm {
         numInputs = numberOfInputs;
     }
 
+    public static int getNumInputs() {
+        return numInputs;
+    }
+
     public static String getFinalEquation() {
         return String.join(" + ", letterEq(finalEquation).get(0));
     }

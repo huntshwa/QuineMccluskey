@@ -158,7 +158,9 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
                     throw new RuntimeException(ex);
                 }
                 for (int i = 0; i < outputs.size(); i++) {
-                    outputs.set(i, outputs.get(i).substring(0, 8) + " " + table.getModel().getColumnName(i + inputSlider.getValue()) + outputs.get(i).substring(8));
+                    if (!outputs.get(i).equals("No Equations")) {
+                        outputs.set(i, outputs.get(i).substring(0, 8) + " " + table.getModel().getColumnName(i + inputSlider.getValue()) + outputs.get(i).substring(8));
+                    }
                 }
                 outputText.setText(String.join("\n", outputs));
             }
@@ -196,7 +198,11 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
             for (int i = 0; i < model.getRowCount(); i++) {
                 for (int j = 0; j < model.getColumnCount(); j++) {
                     Object value = model.getValueAt(i, j);
-                    if (value != null) {
+                    if (value != null && !value.equals("")) {
+                        if (!value.getClass().equals(Integer.class)) {
+                            if (value.equals("X")) value = "x";
+                            if (!value.equals("1") && !value.equals("x")) value = "0";
+                        }
                         if (j == model.getColumnCount() - 1) {
                             writer.write((String) value);
                         } else {

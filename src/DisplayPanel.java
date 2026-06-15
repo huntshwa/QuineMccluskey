@@ -1,3 +1,4 @@
+import javax.imageio.ImageIO;
 import javax.swing.table.DefaultTableModel;
 import java.awt.Graphics;
 import java.awt.Dimension;
@@ -5,11 +6,9 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.FileNotFoundException;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.util.ArrayList;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.awt.Font;
 
 
@@ -19,8 +18,17 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
     private JSlider inputSlider;
     private JTextArea outputText = new JTextArea("No Equations");
     private static ArrayList<String> outputs = new ArrayList<>();
+    private BufferedImage sponge;
 
     public DisplayPanel() {
+
+        //background creation
+        try {
+            sponge = ImageIO.read(new File("src/sponge2.jpg"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
 
         //create sliders
         inputSlider = new JSlider(1, 5, 4); //can't have less than 1 input, inefficient with more than 15, letter transformation stops at 26, four is common
@@ -99,7 +107,7 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
         combinedPanels.setLayout(new BorderLayout());
 
         combinedPanels.add(controlPanel, BorderLayout.EAST);
-        combinedPanels.add(Box.createHorizontalStrut(20));
+        combinedPanels.add(Box.createHorizontalStrut(10));
         combinedPanels.add(tableScrollPane, BorderLayout.WEST);
 
         add(combinedPanels, BorderLayout.SOUTH);
@@ -123,6 +131,11 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
     public void paintComponent(Graphics g){
         super.paintComponent(g);
 
+        for (int xpos = 0; xpos < 4; xpos++) {
+            for (int ypos = 0; ypos < 4; ypos++) {
+                g.drawImage(sponge, (xpos * 300) - 30, (ypos * 168) - 46, null);
+            }
+        }
         g.drawString("Truth Table", 10, 30);
     }
 

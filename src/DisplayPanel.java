@@ -31,8 +31,8 @@ public class DisplayPanel extends JPanel implements ActionListener, ChangeListen
 
 
         //create sliders
-        inputSlider = new JSlider(1, 5, 4); //can't have less than 1 input, inefficient with more than 15, letter transformation stops at 26, four is common
-        outputSlider = new JSlider(1, 5, 1); //need at least one output, prob don't need more than 15 (can be changed), one is common
+        inputSlider = new JSlider(1, 10, 4); //can't have less than 1 input, inefficient with more than 15, letter transformation stops at 26, four is common
+        outputSlider = new JSlider(1, 10, 1); //need at least one output, prob don't need more than 15 (can be changed), one is common
 
         inputSlider.setMinorTickSpacing(1);
         inputSlider.setMajorTickSpacing(1);

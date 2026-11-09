@@ -316,8 +316,9 @@ public class Algorithm {
                     number++;
                 }
             }
-
-            DisplayPanel.updateOutputs("Equation: " + String.join(" + ", letterEq(finalEquation).get(0)));
+            for (int j = 0; j < finalEquation.size(); j++) {
+                DisplayPanel.updateOutputs("Equation: " + String.join(" + ", letterEq(finalEquation).get(j)));
+            }
 
             finalEquation.clear();
         }
